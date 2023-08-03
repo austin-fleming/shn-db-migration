@@ -1,0 +1,89 @@
+Paragraph:
+    <!-- wp:paragraph -->
+        <p>content</p>
+    <!-- /wp:paragraph -->
+
+    Bold:
+    <!-- wp:paragraph -->
+        <p><strong>content</strong></p>
+    <!-- /wp:paragraph -->
+
+    Italic:
+    <!-- wp:paragraph -->
+        <p><em>content</em></p>
+    <!-- /wp:paragraph -->
+
+    Align Center:
+    <!-- wp:paragraph {"align":"center"} -->
+        <p class="has-text-align-center">content</p>
+    <!-- /wp:paragraph -->
+
+Heading 2:
+    <!-- wp:heading -->
+        <h2 class="wp-block-heading">Heading 2</h2>
+    <!-- /wp:heading -->
+
+Heading 3:
+    <!-- wp:heading {"level":3} -->
+        <h3 class="wp-block-heading">Heading 3</h3>
+    <!-- /wp:heading -->
+
+Quote:
+    <!-- wp:quote -->
+        <blockquote class="wp-block-quote">
+            <!-- wp:paragraph -->
+                <p>quote content</p>
+            <!-- /wp:paragraph -->
+            
+            <cite>And a citation</cite>
+        </blockquote>
+    <!-- /wp:quote -->
+
+List:
+    <!-- wp:list -->
+        <ul>
+            <!-- wp:list-item -->
+                <li>Item 1</li>
+            <!-- /wp:list-item -->
+
+            <!-- wp:list-item -->
+                <li>Item 2</li>
+            <!-- /wp:list-item -->
+        </ul>
+    <!-- /wp:list -->
+
+Complex Quote:
+    <!-- wp:quote -->
+        <blockquote class="wp-block-quote">
+            <!-- wp:paragraph -->
+                <p>quote content</p>
+            <!-- /wp:paragraph -->
+
+            <!-- wp:list -->
+                <ul>
+                    <!-- wp:list-item -->
+                        <li>Item 1</li>
+                    <!-- /wp:list-item -->
+
+                    <!-- wp:list-item -->
+                        <li>Item 2</li>
+                    <!-- /wp:list-item -->
+                </ul>
+            <!-- /wp:list -->
+
+            <!-- wp:paragraph -->
+                <p>quote content</p>
+            <!-- /wp:paragraph -->
+            
+            <cite>Some citation</cite>
+        </blockquote>
+    <!-- /wp:quote -->
+
+Image:
+    <!-- wp:image {"id":83,"width":960,"height":540,"sizeSlug":"full","linkDestination":"none"} -->
+        <figure class="wp-block-image size-full is-resized">
+            <img src="https://philliph16.sg-host.com/wp-content/uploads/2023/08/kanhaiya-sharma-_HdRQWJ-Pt8-unsplash.jpg" alt="Here is alt text" class="wp-image-83" width="960" height="540"/>
+            
+            <figcaption class="wp-element-caption">A caption for this image</figcaption>
+        </figure>
+    <!-- /wp:image -->

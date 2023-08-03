@@ -1,0 +1,24 @@
+{
+  "name": "shn-db-migration",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/austin-fleming/shn-db-migration.git",
+  "author": "Austin Fleming <austin@flimflamfactory.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node14 --outfile=index.js",
+    "start": "node index.js",
+    "buildstart": "yarn build && yarn start",
+    "prebuild:sanity_pull_ids": "esbuild src/scripts/sanity_pull_posts.ts --bundle --platform=node --target=node14 --outfile=built_scripts/sanity_pull_posts.js && node built_scripts/sanity_pull_posts.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.5",
+    "@types/wpapi": "^1.1.1",
+    "esbuild": "^0.18.17",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@sanity/client": "^6.4.0",
+    "wpapi": "^1.2.2"
+  }
+}
