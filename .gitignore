@@ -1,3 +1,8 @@
+# system
+.DS_Store
+Thumbs.db
+
+
 # temporary files
 _scratch
 **/temporary_data/**/*
