@@ -15,32 +15,21 @@ export type PostEntity = {
     }
     tags: string[],
     isPublished: boolean,
-    coverImage: {
+    coverImage?: {
         url: string,
-        alt?: string,
-        caption?: string,
-        description?: string,
+        alt: string,
+        width: number,
+        height: number,
     }
-    body: {
-        // TODO: will need to address linking
-        content: string,
-        images: 
-            Array<{
-                url: string,
-                alt?: string,
-                caption?: string,
-                description?: string,
-            }>
-    }
+    body: string,
     seo: {
-        canonicalUrl: string,
-        title?: string,
+        originalUrl: string,
         description?: string,
         image?: {
             url: string,
-            alt?: string,
+            alt: string,
+            width: number,
+            height: number,
         },
-        aliases: string[],
     },
-
 }

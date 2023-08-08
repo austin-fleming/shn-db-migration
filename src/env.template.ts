@@ -1,6 +1,8 @@
-export type EnvironmentType = {
+export type EnvironmentTemplate = {
     WP_API: {
-        ENDPOINT: string
+        ENDPOINT: string,
+        USERNAME: string,
+        PASSWORD: string
     },
     SANITY: {
         PROJECT_ID: string,

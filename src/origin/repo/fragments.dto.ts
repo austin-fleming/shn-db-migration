@@ -1,3 +1,5 @@
+import { toHTML } from "@portabletext/to-html"
+
 export type FigureType ={
     _type: "figure",
     alt: string,
@@ -10,7 +12,9 @@ export type FigureType ={
 
 export type BasicImageType = {}
 
-export type BodyType = {}
+export type BodyType = Parameters<typeof toHTML>[0]
+
+export type CardBodyType = BodyType
 
 export type UrlType = string
 
@@ -19,7 +23,11 @@ export type PostSeoType = {
     seoSchemaType: "newsArticle" | "article",
     title?: string,
     description?: string,
-    image?: BasicImageType,
+    image?: {
+        asset: {
+            _ref: string,
+        }
+    },
 }
 
 export type SlugType = {

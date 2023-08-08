@@ -1,31 +1,45 @@
 import { PostEntity } from "../../common/post.entity";
 import { Result, result } from "../../lib/result";
 import { isDateString } from "../../lib/validators/is-date-string";
+import { isString } from "../../lib/validators/is-string";
 import { QuickquoteDTO } from "./quickquote.repo";
+import { bodyTextToHtml } from "./utils/body-text-to-html";
+import { parseSanityAssetId } from "./utils/parse-sanity-asset-id";
+import { createTemporaryMediaId } from "./utils/temporary-media-id";
 
-const mapQuickquoteToPost = (quickquote: QuickquoteDTO): Result<PostEntity> => {
+const dtoToPost = (quickquote: QuickquoteDTO): Result<PostEntity> => {
     try {
         const id = quickquote._id;
-        if (!id) throw new Error(`QuickQuote value "_id" was "${id}"; expected a string.`)
+        if (!id) 
+            throw new Error(`|> "_id" was "${id}"; expected a string.`)
+
+        const isPublished = !id.startsWith("drafts.")
 
         const title = quickquote.title;
-        if (!title) throw new Error(`QuickQuote value "title" was "${title}"; expected a string.`)
+        if (!title) 
+            throw new Error(`|> "title" was "${title}"; expected a string.`)
 
         const slug = quickquote.slug?.current;
-        if (!slug) throw new Error(`QuickQuote value "slug.current" was "${slug}"; expected a string.`)
+        if (!isString(slug)) 
+            throw new Error(`|> "slug.current" was "${slug}"; expected a string.`)
 
+        const originalUrl = `https://smarthernews.com/quickquotes/${slug}`
+        
         const updatedAtTimezone = quickquote._updatedAt;
-        if (!isDateString(updatedAtTimezone)) throw new Error(`QuickQuote value "_updatedAt" was "${updatedAtTimezone}"; expected a date string.`)
+        if (!isString(updatedAtTimezone) || !isDateString(updatedAtTimezone)) 
+            throw new Error(`|> "_updatedAt" was "${updatedAtTimezone}"; expected a string.`)
 
         const updatedAtGMT = new Date(updatedAtTimezone).toUTCString();
 
         const createdAtTimezone = quickquote._createdAt;
-        if (!isDateString(createdAtTimezone)) throw new Error(`QuickQuote value "_createdAt" was "${createdAtTimezone}"; expected a date string.`)
+        if (!isString(createdAtTimezone) || !isDateString(createdAtTimezone)) 
+            throw new Error(`|> "_createdAt" was "${createdAtTimezone}"; expected a string.`)
 
         const createdAtGMT = new Date(createdAtTimezone).toUTCString();
 
         const publishedAtTimezone = quickquote.datePublished;
-        if (!isDateString(publishedAtTimezone)) throw new Error(`QuickQuote value "datePublished" was "${publishedAtTimezone}"; expected a date string.`)
+        if (!isString(publishedAtTimezone) || !isDateString(publishedAtTimezone)) 
+            throw new Error(`|> "datePublished" was "${publishedAtTimezone}"; expected a string.`)
 
         const publishedAtGMT = new Date(publishedAtTimezone).toUTCString();
 
@@ -33,37 +47,63 @@ const mapQuickquoteToPost = (quickquote: QuickquoteDTO): Result<PostEntity> => {
         const authorId = author?._id;
         const authorName = author?.title;
         const authorSlug = author?.slug?.current;
-        if (authorId && !authorName) throw new Error(`QuickQuote value "author.title" was "${authorName}"; expected a string.`)
-        if (authorId && !authorSlug) throw new Error(`QuickQuote value "author.slug.current" was "${authorSlug}"; expected a string.`)  
+        if (authorId && !authorName) 
+            throw new Error(`|> "author.title" was "${authorName}"; expected a string.`)
+        if (authorId && !authorSlug) 
+            throw new Error(`|> "author.slug.current" was "${authorSlug}"; expected a string.`)  
 
-        const tags = quickquote.tags || [];
+        const tags = quickquote.tags?.map(tag => 
+                tag.label.toLowerCase()
+            ) || [];
 
-        const isPublished = id.startsWith("drafts.") ? false : true;
+        let coverImage: PostEntity["coverImage"] | undefined = undefined;
+        if (quickquote.mainimage) {
+            const {id, width, height} = parseSanityAssetId(quickquote.mainimage?.asset?._ref).unwrapOrThrow()
+            const alt = quickquote.mainimage?.alt || title;
 
-        // TODO: fetch image data from Sanity
-        const coverImage = quickquote.mainimage;
-        const coverImageUrl = coverImage?.asset?.url;
-        const coverImageAlt = coverImage?.alt;
-        const coverImageCaption = coverImage?.caption;
-        const coverImageDescription = coverImage?.description;
-        if (coverImage && !coverImageUrl) throw new Error(`QuickQuote value "mainimage.asset.url" was "${coverImageUrl}"; expected a string.`)
+            coverImage = {
+                url: createTemporaryMediaId(id),
+                alt,
+                width,
+                height
+            }
+        }
 
-        // TODO: parse out body
-        const body = quickquote.body;
-        if (!body) throw new Error(`QuickQuote value "body" was "${body}"; expected an object.`)
+        if (!quickquote.featured_quote) 
+            throw new Error(`|> "featured_quote" is missing.`)
 
-        // NOTE: make sure to update category if duplicated
-        const canonicalUrl = `https://smarthernews.com/quickquotes/${slug}`
+        const {quote: quoteQuote, summary: quoteSummary, citation: quoteCitation} = quickquote.featured_quote;
+        if (!quoteQuote)
+            throw new Error(`|> "featured_quote.quote" is missing.`)
         
-        const seo = quickquote.postSeo;
-        const seoTitle = seo?.title || title.slice(0, 75);
-        const seoDescription = seo?.description; // TODO: get stringified body as fallback
-        const seoImageUrl = coverImageUrl;
-        const seoImageAlt = coverImageAlt;
+        const serializedQuote = `
+            <!-- wp:quote -->
+            <blockquote class="wp-block-quote">
+                <!-- wp:paragraph -->
+                    <p>${quoteQuote}</p>
+                <!-- /wp:paragraph -->
+                ${quoteCitation ? `<cite>${quoteCitation}</cite>` : ''}
+            </blockquote>
+        `
 
-        const aliases = quickquote.aliases;
-        if (aliases && !Array.isArray(aliases)) throw new Error(`QuickQuote value "aliases" was "${aliases}"; expected an array.`)
-        
+        const serializedBody = bodyTextToHtml(quickquote.body).unwrapOrThrow()
+
+        const formattedBody = `
+            ${serializedQuote}
+            ${serializedBody}
+        `
+
+        let seoImage = coverImage;
+        if (quickquote.postSeo?.image) {
+            const {id, width, height} = parseSanityAssetId(quickquote.postSeo?.image.asset._ref).unwrapOrThrow()
+            
+            seoImage = {
+                url: createTemporaryMediaId(id),
+                alt: '',
+                width: width,
+                height: height
+            }
+        }
 
         const post: PostEntity = {
             id,
@@ -83,36 +123,21 @@ const mapQuickquoteToPost = (quickquote: QuickquoteDTO): Result<PostEntity> => {
                 } : undefined,
             tags,
             isPublished,
-            coverImage: {
-                url: coverImageUrl,
-                alt: coverImageAlt,
-                caption: coverImageCaption,
-                description: coverImageDescription,
-            },
-            body: {
-                content: body,
-                // TODO: populate
-                images: []
-            },
+            coverImage: coverImage || undefined,
+            body: formattedBody,
             seo: {
-                canonicalUrl,
-                title: seoTitle,
-                description: seoDescription,
-                image: seoImageUrl 
-                    ? {
-                        url: seoImageUrl,
-                        alt: seoImageAlt,
-                    } : undefined,
-                aliases: aliases || undefined,
+                originalUrl,
+                description: quickquote.postSeo?.description || quoteSummary || quoteQuote,
+                image: seoImage,
             },
         }
 
         return result.ok(post)
     } catch (err) {
-        return result.fail(new Error(`Failed to convert quickquote with id "${quickquote?._id}" to post: ${err}`))
+        return result.fail(new Error(`|> Failed to convert quickquote with id "${quickquote?._id}" to post: ${err}`))
     }
 }
 
 export const quickquoteMapper = {
-    mapQuickquoteToPost,
+    dtoToPost,
 }
