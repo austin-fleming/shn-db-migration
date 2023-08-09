@@ -60,19 +60,38 @@ export type QuickreadDTO = {
     aliases?: string[],
 }
 
-const quickreadQuery = `
-    {
-        ...,
-        author->,
-        series->,
-        body
-    }
-`
-
-const getQuickread = async (id: string): Promise<Result<QuickreadDTO>> => {
+const listIds = async (max: number): Promise<Result<{id: string, type: string}[]>> => {
     try {
         return repoClient
-            .fetch<QuickreadDTO>(`*[_type == "quickreads" && _id == "${id}"][0] ${quickreadQuery}`)
+            .fetch<{id: string, type: string}[]>(`
+                *[_type == "quickreads" && !(_id in path("drafts.**"))]
+                | order(_createdAt asc) 
+                [0...${max}] 
+                {
+                    id: _id,
+                    type: _type
+                }
+            `)
+            .then((ids) =>
+                result.ok(ids)
+            )
+    } catch (err) {
+        return result.fail(new Error(`|> Failed to fetch quickread ids: ${err}`))
+    }
+}
+
+const findById = async (id: string): Promise<Result<QuickreadDTO>> => {
+    try {
+        return repoClient
+            .fetch<QuickreadDTO>(`
+                *[_type == "quickreads" && _id == "${id}"]
+                [0]
+                {
+                    ...,
+                    author->,
+                    series->
+                }
+            `)
             .then((quickread) =>
                 result.ok(quickread)
             )
@@ -81,11 +100,7 @@ const getQuickread = async (id: string): Promise<Result<QuickreadDTO>> => {
     }
 }
 
-const getQuickreadAsPost = async (id: string): Promise<Result<PostEntity>> => 
-    (await getQuickread(id))
-        .chainOk(quickreadMapper.dtoToPost)
-
 export const quickreadRepo = {
-    getQuickread,
-    getQuickreadAsPost,
+    listIds,
+    findById
 }

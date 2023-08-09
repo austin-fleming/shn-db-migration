@@ -31,19 +31,36 @@ export type QuickquoteDTO = {
     aliases: string[],
 }
 
-const quickquoteQuery = `
-    {
-        ...,
-        author->,
-        mainimage,
-        featured_quote
-    }
-`
-
-const getQuickquote = async (id: string): Promise<Result<QuickquoteDTO>> => {
+const listIds = async (max: number): Promise<Result<{id: string, type: string}[]>> => {
     try {
         return repoClient
-            .fetch<QuickquoteDTO>(`*[_type == "quickquotes" && _id == "${id}"][0] ${quickquoteQuery}`)
+            .fetch<{id: string, type: string}[]>(`
+                *[_type == "quickquotes" && !(_id in path("drafts.**"))] 
+                | order(_createdAt asc) 
+                [0...${max}] 
+                {
+                    id: _id,
+                    type: _type
+                }
+            `)
+            .then((ids) =>
+                result.ok(ids)
+            )
+    } catch (err) {
+        return result.fail(new Error(`|> Failed to fetch quickquote ids: ${err}`))
+    }
+}
+
+const findById = async (id: string): Promise<Result<QuickquoteDTO>> => {
+    try {
+        return repoClient
+            .fetch<QuickquoteDTO>(`
+                *[_type == "quickquotes" && _id == "${id}"][0]
+                {
+                    ...,
+                    author->
+                }
+            `)
             .then((quickquote) =>
                 result.ok(quickquote)
             )
@@ -52,11 +69,7 @@ const getQuickquote = async (id: string): Promise<Result<QuickquoteDTO>> => {
     }
 }
 
-const getQuickquoteAsPost = async (id: string): Promise<Result<PostEntity>> => 
-    (await getQuickquote(id))
-        .chainOk(quickquoteMapper.dtoToPost)
-
 export const quickquoteRepo = {
-    getQuickquote,
-    getQuickquoteAsPost
+    listIds,
+    findById
 }
