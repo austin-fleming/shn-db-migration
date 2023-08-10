@@ -1,5 +1,5 @@
 import { EitherAsync, Left, Right } from "purify-ts";
-import { PostEntity } from "../../common/model/post.entity";
+import { PostEntity } from "../../common/types/post.entity";
 import { WpPostCreateDTO } from "./types.dto";
 import { errorFromUnknown } from "../../lib/error-handling/error-from-unknown";
 import { genericToIntermediate } from "./intermediate.mapper";

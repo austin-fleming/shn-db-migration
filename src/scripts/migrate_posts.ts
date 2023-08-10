@@ -7,33 +7,11 @@ import { postMapper } from "../destination/repo/post.mapper"
 import fs from 'fs'
 import path from 'path'
 import { sleep } from "../lib/sleep"
-import { get } from "http"
+import { FailedMigrationData, MigrationData, OutcomeStats } from "../common/types/script.types"
+import { FAILURE_FILE_PREFIX, MIGRATION_DATA_OUTPUT_PATH, SUCCESS_FILE_PREFIX } from "../common/constants"
 
-const SUCCESS_OUTPUT_PATH = `./src/temporary_data/migration_stats_${new Date().toUTCString()}.json`
-const FAILURE_OUTPUT_PATH = `./src/temporary_data/failure_stats_${new Date().toUTCString()}.json`
-
-type OutcomeStats = {
-    successes: number,
-    failures: number,
-    total: number,
-    successRate: number
-}
-
-type MigrationData = {
-    urls: {
-        existing: string
-        destination: string
-    },
-    ids: {
-        existing: string
-        destination: number
-    }
-}
-
-type FailedMigrationData = {
-    errorMessage: string,
-    existingId: string,
-}
+const SUCCESS_FILE_PATH = `${MIGRATION_DATA_OUTPUT_PATH}/${SUCCESS_FILE_PREFIX}${new Date().toUTCString()}.json`
+const FAILURE_FILE_PATH = `${MIGRATION_DATA_OUTPUT_PATH}/${FAILURE_FILE_PREFIX}${new Date().toUTCString()}.json`
 
 const migratePost = ({
     id, 
@@ -81,7 +59,7 @@ const migratePost = ({
 const recordMigrationDataToFile = (migrationDataList: MigrationData[]): EitherAsync<Error, string> =>
     EitherAsync(async ({liftEither}) => {
         try {
-            const outputPath = path.resolve(SUCCESS_OUTPUT_PATH)
+            const outputPath = path.resolve(SUCCESS_FILE_PATH)
             const data = JSON.stringify(migrationDataList, null, 2)
 
             fs.writeFileSync(outputPath, data)
@@ -95,7 +73,7 @@ const recordMigrationDataToFile = (migrationDataList: MigrationData[]): EitherAs
 const recordFailedMigrationDataToFile = (failedMigrationDataList: FailedMigrationData[]): EitherAsync<Error, string> =>
     EitherAsync(async ({liftEither}) => {
         try {
-            const outputPath = path.resolve(FAILURE_OUTPUT_PATH)
+            const outputPath = path.resolve(FAILURE_FILE_PATH)
             const data = JSON.stringify(failedMigrationDataList, null, 2)
 
             fs.writeFileSync(outputPath, data)
@@ -214,13 +192,14 @@ const migratePosts = (max: number): EitherAsync<Error, OutcomeStats> =>
 migratePosts(10000)
     .run()
     .then((outcome) => {
-        console.log('Migration completed')
         outcome
-            .caseOf({
-                Left: (error) => {
-                    console.error(error)
-                },
-                Right: (stats) => {
+        .caseOf({
+            Left: (error) => {
+                console.error(error)
+                process.exit(1)
+            },
+            Right: (stats) => {
+                    console.log('--- Migration completed ---')
                     console.dir(stats)
                 }
             })

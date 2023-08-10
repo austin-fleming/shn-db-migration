@@ -1,4 +1,4 @@
-import { PostEntity } from "../../common/model/post.entity";
+import { PostEntity } from "../../common/types/post.entity";
 import { Result, result } from "../../lib/result";
 import { isDateString } from "../../lib/validators/is-date-string";
 import { isString } from "../../lib/validators/is-string";

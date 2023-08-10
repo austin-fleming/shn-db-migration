@@ -1,5 +1,5 @@
 import { Either, Left, Right } from "purify-ts";
-import { PostEntity } from "../../common/model/post.entity";
+import { PostEntity } from "../../common/types/post.entity";
 import { isDateString } from "../../lib/validators/is-date-string";
 import { isString } from "../../lib/validators/is-string";
 import { bodyTextToHtml } from "./utils/body-text-to-html";

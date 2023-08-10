@@ -1,5 +1,5 @@
 import { EitherAsync, Left, Right } from "purify-ts";
-import { PostEntity } from "../../common/model/post.entity";
+import { PostEntity } from "../../common/types/post.entity";
 import { Result, result } from "../../lib/result";
 import { quickquoteMapper } from "./quickquote.mapper";
 import { quickquoteRepo } from "./quickquote.repo";

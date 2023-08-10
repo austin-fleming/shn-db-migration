@@ -1,5 +1,5 @@
 import { EitherAsync, Left, Right } from "purify-ts";
-import { PostEntity } from "../../common/model/post.entity";
+import { PostEntity } from "../../common/types/post.entity";
 import { mediaRepo } from "./media.repo";
 import { extractTemporaryMediaId, findTemporaryMediaIds, replaceTemporaryMediaIds } from "../../common/utils/temporary-media-id";
 import { constructImageUrl } from "../../existing/repo/utils/construct-image-url";

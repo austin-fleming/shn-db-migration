@@ -6,10 +6,9 @@
   "author": "Austin Fleming <austin@flimflamfactory.com>",
   "license": "MIT",
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node14 --outfile=index.js",
-    "start": "node index.js",
-    "buildstart": "yarn build && yarn start",
-    "prebuild:migrate_posts": "esbuild src/scripts/migrate_posts.ts --bundle --platform=node --target=node14 --outfile=built_scripts/migrate_posts.js && node built_scripts/migrate_posts.js"
+    "runscript:migrate_posts": "esbuild src/scripts/migrate_posts.ts --bundle --platform=node --target=node14 --outfile=built_scripts/migrate_posts.js && node built_scripts/migrate_posts.js",
+    "runscript:create_redirects": "esbuild src/scripts/create_redirects.ts --bundle --platform=node --target=node14 --outfile=built_scripts/create_redirects.js && node built_scripts/create_redirects.js"
+
   },
   "devDependencies": {
     "@types/node": "^20.4.5",
