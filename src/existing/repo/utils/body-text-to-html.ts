@@ -1,10 +1,11 @@
 import { PortableTextHtmlComponents, toHTML } from "@portabletext/to-html";
-import { Result, result } from "../../../lib/result";
 import { isString } from "../../../lib/validators/is-string";
 import { parseSanityAssetId } from "./parse-sanity-asset-id";
-import { createTemporaryMediaId } from "./temporary-media-id";
+import { createTemporaryMediaId } from "../../../common/utils/temporary-media-id";
+import { Either, Left, Right } from "purify-ts";
+import { errorFromUnknown } from "../../../lib/error-handling/error-from-unknown";
 
-export const bodyTextToHtml = (body: Parameters<typeof toHTML>[0], isQuickreadCard?: boolean): Result<string> => {
+export const bodyTextToHtml = (body: Parameters<typeof toHTML>[0], isQuickreadCard?: boolean): Either<Error, string> => {
     try {
         const serializedText = toHTML(body, {
             components: {
@@ -34,19 +35,24 @@ export const bodyTextToHtml = (body: Parameters<typeof toHTML>[0], isQuickreadCa
                         `<!-- wp:list-item --><li>${children}</li><!-- /wp:list-item -->`,
                 },
                 types: {
-                    image: ({value}) => {
-                        const {id, width, height} = parseSanityAssetId(value.asset._ref).unwrapOrThrow()
-                        const imageId = createTemporaryMediaId(id)
+                    image: ({value}) => 
+                        parseSanityAssetId(value.asset._ref)
+                            .map(({id, width, height, format}) => {
+                                const imageId = createTemporaryMediaId(id, width, height, format)
 
-                        // TODO: should "is-resized" stay?
-                        return `
-                        <!-- wp:image {"id":"${imageId}","width":${width},"height":${height},"sizeSlug":"full","linkDestination":"none"} -->
-                            <figure class="wp-block-image size-full is-resized">
-                                <img src="${imageId}" alt="${value.alt || ''}" class="wp-image-${imageId}" width="${width}" height="${height}"/>
-                            </figure>
-                        <!-- /wp:image -->
-                        `
-                    },
+                                // TODO: should "is-resized" stay?
+                                return `
+                                <!-- wp:image {"id":"${imageId}","width":${width},"height":${height},"sizeSlug":"full","linkDestination":"none"} -->
+                                    <figure class="wp-block-image size-full is-resized">
+                                        <img src="${imageId}" alt="${value.alt || ''}" class="wp-image-${imageId}" width="${width}" height="${height}"/>
+                                    </figure>
+                                <!-- /wp:image -->
+                                `
+                            })
+                            .ifLeft(error => {
+                                throw error
+                            })
+                            .unsafeCoerce() ,
                     youtube: ({value}) => {
                         if (!isString(value.url)) throw new Error(`QuickRead value "body > youtube" was "${value.url}"; expected a string.`)
 
@@ -72,7 +78,7 @@ export const bodyTextToHtml = (body: Parameters<typeof toHTML>[0], isQuickreadCa
                             return ''
                         
                         if (!isString(value?.href))
-                            throw new Error(`|> "body > marks > link" was "${value.href}"; expected a string.`)
+                            throw new Error(`"body > marks > link" was "${value.href}"; expected a string.`)
 
                         let enforcedHttpsHref = value.href.startsWith('http://') 
                             ? value.href.replace('http://', 'https://') 
@@ -86,12 +92,12 @@ export const bodyTextToHtml = (body: Parameters<typeof toHTML>[0], isQuickreadCa
                 }
             },
             onMissingComponent: (component) => {
-                throw new Error(`|> Missing component "${component}"`)
+                throw new Error(`Missing component "${component}"`)
             }
         })
 
-        return result.ok(serializedText)
+        return Right(serializedText)
     } catch (err: unknown) {
-        return result.fail(new Error(`|> Failed to convert portable to HTML: ${err}`))
+        return Left(errorFromUnknown(err, `Failed to convert portable text to HTML`))
     }
 }

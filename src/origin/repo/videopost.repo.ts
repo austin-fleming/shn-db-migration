@@ -41,15 +41,15 @@ const listIds = async (max: number): Promise<Result<{id: string, type: string}[]
                 | order(_createdAt asc) 
                 [0...${max}]
                 {
-                    id: _id,
-                    type: _type
+                    "id": _id,
+                    "type": _type
                 }
             `)
             .then((ids) =>
                 result.ok(ids)
             )
     } catch (err) {
-        return result.fail(new Error(`|> Failed to fetch videopost ids: ${err}`))
+        return result.fail(new Error(`|> Failed to fetch videopost ids:\n${err}`))
     }
 }
 

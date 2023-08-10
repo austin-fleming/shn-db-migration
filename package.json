@@ -22,6 +22,7 @@
   "dependencies": {
     "@portabletext/to-html": "^2.0.0",
     "@sanity/client": "^6.4.0",
+    "purify-ts": "^2.0.1",
     "wpapi": "^1.2.2"
   }
 }

@@ -1,4 +1,4 @@
-import { PostEntity } from "../../common/post.entity";
+import { PostEntity } from "../../common/model/post.entity";
 import { Result, result } from "../../lib/result";
 import { isDateString } from "../../lib/validators/is-date-string";
 import { isString } from "../../lib/validators/is-string";
@@ -84,6 +84,7 @@ const dtoToPost = (quickquote: QuickquoteDTO): Result<PostEntity> => {
                 <!-- /wp:paragraph -->
                 ${quoteCitation ? `<cite>${quoteCitation}</cite>` : ''}
             </blockquote>
+            <!-- /wp:quote -->
         `
 
         const serializedBody = bodyTextToHtml(quickquote.body).unwrapOrThrow()

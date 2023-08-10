@@ -1,4 +1,4 @@
-import { PostEntity } from "../../common/post.entity";
+import { PostEntity } from "../../common/model/post.entity";
 import { Result, result } from "../../lib/result";
 import { AuthorType, BodyType, FigureType, PostSeoType, SlugType } from "./fragments.dto";
 import { quickquoteMapper } from "./quickquote.mapper";
@@ -34,20 +34,21 @@ export type QuickquoteDTO = {
 const listIds = async (max: number): Promise<Result<{id: string, type: string}[]>> => {
     try {
         return repoClient
-            .fetch<{id: string, type: string}[]>(`
+            .fetch<{id: string, type: string}[]>(
+                `
                 *[_type == "quickquotes" && !(_id in path("drafts.**"))] 
-                | order(_createdAt asc) 
-                [0...${max}] 
+                | order(_createdAt asc)[0...${max}] 
                 {
-                    id: _id,
-                    type: _type
+                    "id": _id, 
+                    "type": _type
                 }
-            `)
-            .then((ids) =>
-                result.ok(ids)
+                `
+            )
+            .then((response) =>
+                result.ok(response)
             )
     } catch (err) {
-        return result.fail(new Error(`|> Failed to fetch quickquote ids: ${err}`))
+        return result.fail(new Error(`|> listIds: Failed to fetch quickquote ids:\n${err}`))
     }
 }
 
@@ -65,7 +66,7 @@ const findById = async (id: string): Promise<Result<QuickquoteDTO>> => {
                 result.ok(quickquote)
             )
     } catch (err) {
-        return result.fail(new Error(`|> Failed to fetch quickquote with id "${id}": ${err}`))
+        return result.fail(new Error(`|> Failed to fetch quickquote with id "${id}":\n${err}`))
     }
 }
 

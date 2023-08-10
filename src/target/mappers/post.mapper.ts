@@ -1,5 +1,5 @@
-import { PostEntity } from "../../common/post.entity";
-import { Result } from "../../lib/result";
+import { PostEntity } from "../../common/model/post.entity";
+import { Result, result } from "../../lib/result";
 import { WpPostCreateDTO } from "../dto/types.dto";
 
 type PostCreateData = {
@@ -10,10 +10,28 @@ type PostCreateData = {
     }
 }
 
-const entityToDto = (entity: PostEntity): Promise<Result<WpPostCreateDTO>> => {
+const postToDto = async (entity: PostEntity): Promise<Result<WpPostCreateDTO>> => {
     try {
-        const { title, content, tags } = entity;
+        const createdPost: WpPostCreateDTO = {
+            title: entity.title,
+            content: entity.body,
+            date: entity.createdAtTimezone,
+            modified: entity.updatedAtTimezone,
+            //tags: tags,
+            //categories: categories,
+            //featured_media: featured_media,
+            //author: author,
+            //excerpt: excerpt,
+            //slug: slug,
+            status: entity.isPublished ? 'publish' : 'draft',
+        }
+            
+        return result.ok(createdPost)
     } catch (err: unknown) {
-
+        return result.fail(new Error(`|> Failed to map post to dto: ${err}`))
     }
+}
+
+export const postMapper = {
+    postToDto
 }

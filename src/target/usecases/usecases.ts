@@ -1,3 +1,4 @@
+import { errorFromUnknown } from "../../lib/error-handling/error-from-unknown"
 import { Result, result } from "../../lib/result"
 import { WpPostCreateDTO, WpPostDTO } from "../dto/types.dto"
 import { postRepo } from "../repo/post.repo"
@@ -28,7 +29,7 @@ const createPost = async (
 
         return postRepo.createPost(postWithReferences)
     } catch (err: unknown) {
-        return result.fail(new Error(`|> Failed to write post with title "${post.title}": ${err}`))
+        return result.fail(errorFromUnknown(err, `Failed to create post with title "${post.title}"`))
     }
 }
 

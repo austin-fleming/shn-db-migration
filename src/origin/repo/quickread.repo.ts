@@ -1,4 +1,5 @@
-import { PostEntity } from "../../common/post.entity";
+import { Either, EitherAsync, Left, Right } from "purify-ts";
+import { PostEntity } from "../../common/model/post.entity";
 import { Result, result } from "../../lib/result";
 import { AuthorType, BodyType, CardBodyType, FigureType, PostSeoType, SlugType } from "./fragments.dto";
 import { quickreadMapper } from "./quickread.mapper";
@@ -68,8 +69,8 @@ const listIds = async (max: number): Promise<Result<{id: string, type: string}[]
                 | order(_createdAt asc) 
                 [0...${max}] 
                 {
-                    id: _id,
-                    type: _type
+                    "id": _id,
+                    "type": _type
                 }
             `)
             .then((ids) =>
@@ -99,6 +100,24 @@ const findById = async (id: string): Promise<Result<QuickreadDTO>> => {
         return result.fail(new Error(`|> Failed to fetch quickread with id "${id}": ${err}`))
     }
 }
+
+/* const alsoFind = (id: string): EitherAsync<Error, PostEntity> => EitherAsync(async ({liftEither}) => {
+    try {
+        const outcome = await repoClient.fetch<PostEntity>(``)
+
+        return liftEither( Right(outcome))
+    } catch (err) {
+        return liftEither( Left(new Error(`|> Failed to fetch quickread with id "${id}": ${err}`)))
+    }
+})
+
+const find2 = (id: string): EitherAsync<Error, PostEntity> => EitherAsync(async ({liftEither}) => 
+    repoClient
+        .fetch<PostEntity>(``)
+        .then(outcome => liftEither(Right(outcome)))
+        .catch(err => liftEither(Left(new Error(`|> Failed to fetch quickread with id "${id}": ${err}`))))
+ */
+// const outcome = alsoFind('test').chain(response => alsoFind(response.id)).map((post => post)).run()
 
 export const quickreadRepo = {
     listIds,

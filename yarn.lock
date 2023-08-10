@@ -161,6 +161,11 @@
   resolved "https://registry.yarnpkg.com/@types/eventsource/-/eventsource-1.1.11.tgz#a2c0bfd0436b7db42ed1b2b2117f7ec2e8478dc7"
   integrity sha512-L7wLDZlWm5mROzv87W0ofIYeQP5K2UhoFnnUyEWLKM6UBb0ZNRgAqp98qE5DkgfBXdWfc2kYmw9KZm4NLjRbsw==
 
+"@types/json-schema@7.0.12":
+  version "7.0.12"
+  resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.12.tgz#d70faba7039d5fca54c83c7dbab41051d2b6f6cb"
+  integrity sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==
+
 "@types/node@^20.4.5":
   version "20.4.5"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.4.5.tgz#9dc0a5cb1ccce4f7a731660935ab70b9c00a5d69"
@@ -442,6 +447,13 @@ progress-stream@^2.0.0:
   dependencies:
     speedometer "~1.0.0"
     through2 "~2.0.3"
+
+purify-ts@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/purify-ts/-/purify-ts-2.0.1.tgz#1317af1791f1d45727f496309d215145f32594bc"
+  integrity sha512-g17AdcyNtXyUuLgMfQN8bS2xPiTrxxkebe5Ssy234NX8ZpE2Nbk6bIXO5MNapFVb77jcv7a4Xt9NfPtuCLGiBQ==
+  dependencies:
+    "@types/json-schema" "7.0.12"
 
 qs@^6.6.0:
   version "6.11.2"
