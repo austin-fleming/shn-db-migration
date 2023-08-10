@@ -3,6 +3,7 @@
         "embeddable",
         "filesize",
         "mainimage",
+        "outfile",
         "quickquote",
         "quickquotes",
         "Quickread",

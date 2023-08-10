@@ -9,9 +9,7 @@
     "build": "esbuild src/index.ts --bundle --platform=node --target=node14 --outfile=index.js",
     "start": "node index.js",
     "buildstart": "yarn build && yarn start",
-    "prebuild:sanity_pull_ids": "esbuild src/scripts/sanity_pull_posts.ts --bundle --platform=node --target=node14 --outfile=built_scripts/sanity_pull_posts.js && node built_scripts/sanity_pull_posts.js",
-    "prebuild:wp_pull_posts": "esbuild src/scripts/wp_pull_posts.ts --bundle --platform=node --target=node14 --outfile=built_scripts/wp_pull_posts.js && node built_scripts/wp_pull_posts.js",
-    "prebuild:wp_write_post_test": "esbuild src/scripts/wp_write_post_test.ts --bundle --platform=node --target=node14 --outfile=built_scripts/wp_write_post_test.js && node built_scripts/wp_write_post_test.js"
+    "prebuild:migrate_posts": "esbuild src/scripts/migrate_posts.ts --bundle --platform=node --target=node14 --outfile=built_scripts/migrate_posts.js && node built_scripts/migrate_posts.js"
   },
   "devDependencies": {
     "@types/node": "^20.4.5",
